@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online Store</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="header-container">
+    <h1>Online Store</h1>
+    <div class="header-info">
+      <span>Wed Mar 16 2022 22:32:13 GMT-0400 (Eastern Daylight Time)</span>
+      <span>Currency: 
+        <img id="flagImage" src="https://upload.wikimedia.org/wikipedia/en/c/cf/Flag_of_Canada.svg" alt="Canada Flag" class="flag" width="30">
+        <select id="currencySelector" onchange="updatePricesAndFlag()">
+          <option value="CAD" selected>CAD</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+        </select>
+      </span>
+    </div>
+  </div>
+  <div id="data-filter">
+    <label for="storeItems">Store Items</label>
+    <select id="storeItems" onchange="filterTable()">
+      <option value="all">All</option>
+      <option value="Tropical">Tropical</option>
+      <option value="Rare">Rare</option>
+      <option value="Bulb">Bulb</option>
+      <option value="Indoor">Indoor</option>
+    </select>
+  </div>
+ 
+  <div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Max</th>
+          <th>Category</th>
+          <th>Image</th>
+        </tr>
+      </thead>
+      <tbody id="productTable"></tbody>
+    </table>
+
+
+  <div class="cart-container">
+    <h1>Cart</h1>
+    <ul id="cartItems"></ul>
+    <div class="cart-summary">
+      <p>Total Items: <span id="totalItems">0</span></p>
+      <p>Total Price: CAD $<span id="totalPrice">0.00</span></p>
+      <button onclick="checkout()">Proceed to Checkout</button>
+    </div>
+    <table id="cartTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Quantity</th>
+          <th>Price</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  
+  <div id="checkoutModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>Item Details</h2>
+      <form id="itemForm">
+        <label for="itemId">Item ID:</label>
+        <input type="text" id="itemId" name="itemId">
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" name="quantity" min="1">
+        <button type="button" onclick="showItemDetails()">Item Details</button>
+        <button type="button" onclick="addItem()">Add Item</button>
+        <button type="button" onclick="removeItem()">Remove Item</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+
+const products = [
+  { id: "PID01", name: "Monstera", price: "CAD $29.99", quantity: 45, max: 3, category: "Tropical", image: "./images/istockphoto-1480093503-612x612.webp" },
+  { id: "PID02", name: "Banana Shrub", price: "CAD $299.99", quantity: 2, max: 1, category: "Rare", image: "./images/istockphoto-1481174550-612x612.webp" },
+  { id: "PID03", name: "Tulip", price: "CAD $4.49", quantity: 100, max: 200, category: "Bulb", image: "./images/istockphoto-1156944070-612x612.jpg" },
+  { id: "PID04", name: "Bird of Paradise", price: "CAD $54.99", quantity: 50, max: 5, category: "Tropical", image: "./images/istockphoto-1268174122-612x612.jpg" },
+  { id: "PID05", name: "Lily", price: "CAD $5.99", quantity: 200, max: 30, category: "Bulb", image: "./images/istockphoto-1372896722-612x612.jpg" },
+  { id: "PID06", name: "Orchid", price: "CAD $19.99", quantity: 10, max: 10, category: "Indoor", image: "./images/istockphoto-1397385972-612x612.webp" },
+  { id: "PID07", name: "Philodendron", price: "CAD $9.99", quantity: 100, max: -50, category: "Indoor", image: "./images/istockphoto-1519664535-612x612.jpg" },
+  { id: "PID08", name: "Ghost Orchid", price: "CAD $129.99", quantity: 5, max: 1, category: "Rare", image: "./images/istockphoto-2179698519-612x612.jpg" },
+];
+
+const tableBody = document.getElementById("productTable");
+
+products.forEach((product) => {
+  const row = document.createElement("tr");
+  row.setAttribute("data-category", product.category);
+  row.setAttribute("data-price-cad", parseFloat(product.price.replace("CAD $", "")));
+
+  row.innerHTML = `
+    <td>${product.id}</td>
+    <td>${product.name}</td>
+    <td class="price">${product.price}</td>
+    <td>${product.quantity}</td>
+    <td>${product.max}</td>
+    <td>${product.category}</td>
+    <td><img src="${product.image}" alt="${product.name}" width="50"></td>
+  `;
+
+  tableBody.appendChild(row);
+});
+function updateCart() {
+  const cartList = document.getElementById('cartItems');
+  const cartTableBody = document.querySelector('#cartTable tbody');
+  const totalItemsElement = document.getElementById('totalItems');
+  const totalPriceElement = document.getElementById('totalPrice');
+
+  cartList.innerHTML = '';
+  cartTableBody.innerHTML = '';
+  totalItems = 0;
+  totalPrice = 0;
+
+  cartItems.forEach(item => {
+    totalItems += item.quantityInCart;
+    totalPrice += item.price * item.quantityInCart;
+
+    // Update cart list
+    const listItem = document.createElement('li');
+    listItem.textContent = `${item.name} - ${item.quantityInCart} x CAD $${item.price}`;
+    cartList.appendChild(listItem);
+
+    // Update cart table
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${item.id}</td>
+      <td>${item.name}</td>
+      <td>${item.quantityInCart}</td>
+      <td>CAD $${item.price.toFixed(2)}</td>
+    `;
+    cartTableBody.appendChild(row);
+  });
+
+  totalItemsElement.textContent = totalItems;
+  totalPriceElement.textContent = totalPrice.toFixed(2);
+}
+
+
+
+    const exchangeRates = {
+      CAD: 1,
+      USD: 0.74,
+      EUR: 0.68
+    };
+
+    const flagMap = {
+      CAD: 'https://upload.wikimedia.org/wikipedia/en/c/cf/Flag_of_Canada.svg',
+      USD: 'https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg',
+      EUR: 'https://upload.wikimedia.org/wikipedia/commons/b/b7/Flag_of_Europe.svg'
+    };
+
+    let cartItems = [];
+    let totalItems = 0;
+    let totalPrice = 0;
+
+    function updatePrices() {
+      const currency = document.getElementById('currencySelector').value;
+      const rows = document.querySelectorAll('#productTable tr');
+
+      rows.forEach(row => {
+        const basePrice = parseFloat(row.getAttribute('data-price-cad'));
+        if (!isNaN(basePrice)) {
+          const convertedPrice = (basePrice * exchangeRates[currency]).toFixed(2);
+          const priceCell = row.querySelector('.price');
+          priceCell.textContent = `${currency} $${convertedPrice}`;
+        }
+      });
+    }
+
+    function updatePricesAndFlag() {
+      updatePrices();
+      const currency = document.getElementById('currencySelector').value;
+      const flagImage = document.getElementById('flagImage');
+      flagImage.src = flagMap[currency];
+    }
+
+    function filterTable() {
+      const category = document.getElementById('storeItems').value;
+      const rows = document.querySelectorAll('#productTable tr');
+      
+      rows.forEach(row => {
+        if (category === 'all' || row.getAttribute('data-category') === category) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    // Function to get the item name
+function getItemName() {
+    return "Item Name"; // Replace with your logic
+}
+
+// Event listener for the button
+document.getElementById("addButton").addEventListener("click", function() {
+    const itemName = getItemName(); // Call the function
+    addItem(itemName); // Assuming addItem is defined elsewhere
+});
+
+    function showItemDetails() {
+      const itemId = document.getElementById('itemId').value;
+      const quantity = document.getElementById('quantity').value;
+      const modal = document.getElementById('checkoutModal');
+      const item = cartItems.find(item => item.id === itemId);
+      
+      if (item && quantity <= item.quantityOnHand) {
+        modal.querySelector('h2').textContent = `Item Details: ${item.name}`;
+        modal.querySelector('form').querySelector('label').textContent = `Quantity Available: ${item.quantityOnHand}`;
+        modal.style.display = 'block';
+      } else {
+        alert('Item not found or insufficient quantity.');
+      }
+    }
+
+
+    function addItem() {
+  const itemId = document.getElementById('itemId').value;
+  const quantity = parseInt(document.getElementById('quantity').value, 10);
+
+  if (!itemId || isNaN(quantity) || quantity <= 0) {
+    alert('Please enter a valid item ID and quantity.');
+    return;
+  }
+
+  // Find the item in the products array by its ID
+  const product = products.find(product => product.id === itemId);
+
+  if (!product) {
+    alert('Item not found.');
+    return;
+  }
+
+  // Check if the item is already in the cart
+  let cartItem = cartItems.find(item => item.id === itemId);
+
+  if (cartItem) {
+    // Update the quantity in the cart if it doesn't exceed the available stock
+    if (cartItem.quantityInCart + quantity <= product.quantity) {
+      cartItem.quantityInCart += quantity;
+    } else {
+      alert(`Cannot add more than available stock (${product.quantity}).`);
+      return;
+    }
+  } else {
+    // Add a new item to the cart
+    if (quantity <= product.quantity) {
+      cartItem = {
+        id: product.id,
+        name: product.name,
+        quantityInCart: quantity,
+        price: parseFloat(product.price.replace('CAD $', '')),
+      };
+      cartItems.push(cartItem);
+    } else {
+      alert(`Cannot add more than available stock (${product.quantity}).`);
+      return;
+    }
+  }
+
+  // Update the cart table and summary
+  updateCartTable();
+  updateCartSummary();
+}
+
+function updateCartTable() {
+  const tbody = document.getElementById('cartTable').getElementsByTagName('tbody')[0];
+  tbody.innerHTML = ''; // Clear existing rows
+
+  cartItems.forEach(item => {
+    const row = tbody.insertRow();
+    row.insertCell(0).textContent = item.id;
+    row.insertCell(1).textContent = item.name;
+    row.insertCell(2).textContent = item.quantityInCart;
+    row.insertCell(3).textContent = `$${item.price.toFixed(2)}`;
+  });
+
+  // Show total row at the bottom
+  const totalRow = tbody.insertRow();
+  totalRow.insertCell(0).textContent = 'Total';
+  totalRow.insertCell(1).textContent = '';
+  totalRow.insertCell(2).textContent = '';
+  totalRow.insertCell(3).textContent = `$${cartItems.reduce((sum, item) => sum + item.price * item.quantityInCart, 0).toFixed(2)}`;
+}
+
+function updateCartSummary() {
+  const totalItems = cartItems.reduce((sum, item) => sum + item.quantityInCart, 0);
+  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantityInCart, 0);
+
+  document.getElementById('totalItems').textContent = totalItems;
+  document.getElementById('totalPrice').textContent = totalPrice.toFixed(2);
+}
+
+
+
+
+function removeItem() {
+  const itemId = document.getElementById('itemId').value;
+  const quantity = parseInt(document.getElementById('quantity').value, 10);
+  const item = cartItems.find(item => item.id === itemId);
+
+  if (item && item.quantityInCart >= quantity) {
+    item.quantityInCart -= quantity;
+    if (item.quantityInCart <= 0) {
+      cartItems = cartItems.filter(cartItem => cartItem.id !== itemId);
+    }
+
+    // Update the cart table and summary
+    updateCartTable();
+    updateCartSummary();
+
+  } else {
+    alert('Invalid item or quantity.');
+  }
+}
+
+function updateCartTable() {
+  const tbody = document.getElementById('cartTable').getElementsByTagName('tbody')[0];
+  tbody.innerHTML = ''; // Clear existing rows
+
+  cartItems.forEach(item => {
+    const row = tbody.insertRow();
+    row.insertCell(0).textContent = item.id;
+    row.insertCell(1).textContent = item.name;
+    row.insertCell(2).textContent = item.quantityInCart;
+    row.insertCell(3).textContent = `$${item.price.toFixed(2)}`;
+  });
+
+  // Show total row at the bottom
+  const totalRow = tbody.insertRow();
+  totalRow.insertCell(0).textContent = 'Total';
+  totalRow.insertCell(1).textContent = '';
+  totalRow.insertCell(2).textContent = '';
+  totalRow.insertCell(3).textContent = `$${cartItems.reduce((sum, item) => sum + item.price * item.quantityInCart, 0).toFixed(2)}`;
+}
+
+function updateCartSummary() {
+  const totalItems = cartItems.reduce((sum, item) => sum + item.quantityInCart, 0);
+  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantityInCart, 0);
+
+  document.getElementById('totalItems').textContent = totalItems;
+  document.getElementById('totalPrice').textContent = totalPrice.toFixed(2);
+}
+
+
+    function updateCart() {
+      const cartList = document.getElementById('cartItems');
+      const totalItemsElement = document.getElementById('totalItems');
+      const totalPriceElement = document.getElementById('totalPrice');
+
+      cartList.innerHTML = '';
+      totalItems = 0;
+      totalPrice = 0;
+
+      cartItems.forEach(item => {
+        totalItems += item.quantityInCart;
+        totalPrice += item.price * item.quantityInCart;
+        
+        const listItem = document.createElement('li');
+        listItem.textContent = `${item.name} - ${item.quantityInCart} x CAD $${item.price}`;
+        cartList.appendChild(listItem);
+      });
+
+      totalItemsElement.textContent = totalItems;
+      totalPriceElement.textContent = totalPrice.toFixed(2);
+    }
+
+    function checkout() {
+      alert('Proceeding to checkout');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('checkoutModal');
+      modal.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
