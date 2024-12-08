@@ -51,4 +51,58 @@ body {
   th {
     background-color: #f4f4f4;
   }
-  
+  /* Modal Styles */
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white background */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Drop shadow for depth */
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px; /* Adjust as needed for your layout */
+  display: none; /* Initially hidden */
+}
+
+.modal h2 {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+.modal label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.modal input {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.modal button {
+  display: inline-block;
+  background-color: #007bff; /* Blue background */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.modal button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+.modal .cancel-button {
+  background-color: #6c757d; /* Grey background for cancel button */
+}
+
+.modal .cancel-button:hover {
+  background-color: #5a6268; /* Darker grey on hover */
+}
