@@ -6,6 +6,8 @@
   <title>Online Store</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
+
 <body>
   <div class="header-container">
     <h1>Online Store</h1>
@@ -48,6 +50,38 @@
       </thead>
       <tbody id="productTable"></tbody>
     </table>
+    <button id="add-product" onclick="openAddProductModal()">Add Product</button>
+    
+    <!-- Modal for adding a new product -->
+    <div id="addProductModal" class="modal" style="display:none;">
+      <h2>Add New Product</h2>
+      <label for="itemId">ID:</label>
+      <input type="text" id="productId">
+      <label for="itemName">Name:</label>
+      <input type="text" id="productName">
+      <label for="itemPrice">Price:</label>
+      <input type="text" id="productPrice">
+      <label for="itemQuantity">Quantity:</label>
+      <input type="text" id="productQuantity">
+      <label for="itemMax">Max:</label>
+      <input type="text" id="productMax">
+      <label for="itemCategory">Category:</label>
+      <input type="text" id="productCategory">
+      <label for="itemImage">Image URL:</label>
+      <input type="text" id="productImage">
+      <button onclick="addNewProduct()">Save</button>
+      <button onclick="closeAddProductModal()">Cancel</button>
+    </div>
+    
+    
+    <div id="productDetail" class="modal" style="display:none;">
+      <h2>Product Details</h2>
+      <div id="productInfo"></div>
+      <h3>Reviews</h3>
+      <ul id="productReviews"></ul>
+    </div>
+    
+
 
 
   <div class="cart-container">
@@ -75,10 +109,10 @@
   <div id="checkoutModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeModal()">&times;</span>
-      <h2>Item Details</h2>
+      <h2>ADD TO CART</h2>
       <form id="itemForm">
-        <label for="itemId">Item ID:</label>
-        <input type="text" id="itemId" name="itemId">
+        <label for="cart-itemId">Item ID:</label>
+        <input type="text" id="cart-itemId" name="itemId">
         <label for="quantity">Quantity:</label>
         <input type="number" id="quantity" name="quantity" min="1">
         <button type="button" onclick="showItemDetails()">Item Details</button>
@@ -88,8 +122,25 @@
     </div>
   </div>
 
-  <script>
+  <div>
+    <h2>Review an Item</h2>
+    <div>
+      <form id="reviewForm">
+        <label for="reviewItemId">Item ID:</label>
+        <input type="text" id="reviewItemId" name="itemId">
+        <label for="reviewText">Reviews:</label>
+        <input type="text" id="reviewText" >
+        <label for="rating">Rating out of 5:</label>
+        <input type="number" id="rating" name="quantity" min="1" max="5">
+        <button type="button" onclick="addReview()">Add Review</button>
+      </form>
+    </div>
+  </div> 
+</body>
 
+
+
+  <script>
 const products = [
   { id: "PID01", name: "Monstera", price: "CAD $29.99", quantity: 45, max: 3, category: "Tropical", image: "./images/istockphoto-1480093503-612x612.webp" },
   { id: "PID02", name: "Banana Shrub", price: "CAD $299.99", quantity: 2, max: 1, category: "Rare", image: "./images/istockphoto-1481174550-612x612.webp" },
@@ -103,7 +154,8 @@ const products = [
 
 const tableBody = document.getElementById("productTable");
 
-products.forEach((product) => {
+for (let i = 0; i < products.length; i++) {
+  const product = products[i];
   const row = document.createElement("tr");
   row.setAttribute("data-category", product.category);
   row.setAttribute("data-price-cad", parseFloat(product.price.replace("CAD $", "")));
@@ -119,19 +171,65 @@ products.forEach((product) => {
   `;
 
   tableBody.appendChild(row);
-});
+}
+
+function addNewProduct() {
+  const newProduct = {
+    id: document.getElementById("productId").value,
+    name: document.getElementById("productName").value,
+    price: document.getElementById("productPrice").value,
+    quantity: parseInt(document.getElementById("productQuantity").value, 10),
+    max: parseInt(document.getElementById("productMax").value, 10),
+    category: document.getElementById("productCategory").value,
+    image: document.getElementById("productImage").value
+  };
+
+  // Add new product to the products array using unshift
+  products.unshift(newProduct);
+
+  // Create a new row for the new product
+  const row = document.createElement("tr");
+  row.setAttribute("data-category", newProduct.category);
+  row.setAttribute("data-price-cad", parseFloat(newProduct.price.replace("CAD $", "")));
+
+  row.innerHTML = `
+    <td>${newProduct.id}</td>
+    <td>${newProduct.name}</td>
+    <td class="price">${newProduct.price}</td>
+    <td>${newProduct.quantity}</td>
+    <td>${newProduct.max}</td>
+    <td>${newProduct.category}</td>
+    <td><img src="${newProduct.image}" alt="${newProduct.name}" width="50"></td>
+  `;
+
+  // Append the new row to the table body
+  tableBody.prepend(row); // Using prepend to add the row at the beginning of the table
+
+  closeAddProductModal();
+}
+
+
+function closeAddProductModal() {
+  document.getElementById("addProductModal").style.display = "none";
+}
+
+
+
 function updateCart() {
   const cartList = document.getElementById('cartItems');
   const cartTableBody = document.querySelector('#cartTable tbody');
   const totalItemsElement = document.getElementById('totalItems');
   const totalPriceElement = document.getElementById('totalPrice');
 
+  // Clear existing content
   cartList.innerHTML = '';
   cartTableBody.innerHTML = '';
-  totalItems = 0;
-  totalPrice = 0;
+  let totalItems = 0;
+  let totalPrice = 0;
 
-  cartItems.forEach(item => {
+  // Using the old method (for loop) to iterate over cartItems
+  for (let i = 0; i < cartItems.length; i++) {
+    const item = cartItems[i];
     totalItems += item.quantityInCart;
     totalPrice += item.price * item.quantityInCart;
 
@@ -149,11 +247,118 @@ function updateCart() {
       <td>CAD $${item.price.toFixed(2)}</td>
     `;
     cartTableBody.appendChild(row);
-  });
+  }
 
   totalItemsElement.textContent = totalItems;
   totalPriceElement.textContent = totalPrice.toFixed(2);
 }
+
+// Function to show product details and reviews
+function viewProductDetail(productId) {
+  // Find the product by ID using a for loop
+  let product = null;
+  for (let i = 0; i < products.length; i++) {
+    if (products[i].id === productId) {
+      product = products[i];
+      break;
+    }
+  }
+
+  if (!product) {
+    alert("Product not found.");
+    return;
+  }
+
+  // Populate product details
+  const productInfo = document.getElementById("productInfo");
+  productInfo.innerHTML = `
+    <p><strong>ID:</strong> ${product.id}</p>
+    <p><strong>Name:</strong> ${product.name}</p>
+    <p><strong>Price:</strong> ${product.price}</p>
+    <p><strong>Quantity:</strong> ${product.quantity}</p>
+    <p><strong>Max Purchase:</strong> ${product.max}</p>
+    <p><strong>Category:</strong> ${product.category}</p>
+    <img src="${product.image}" alt="${product.name}" width="100">
+  `;
+
+  // Display reviews for the product using a for loop
+  const productReviews = document.getElementById("productReviews");
+  productReviews.innerHTML = ""; // Clear previous reviews
+  for (let i = 0; i < reviews.length; i++) {
+    if (reviews[i].itemId === productId) {
+      const reviewItem = document.createElement("li");
+      reviewItem.innerHTML = `<strong>Rating:</strong> ${reviews[i].rating}/5 - ${reviews[i].reviewText}`;
+      productReviews.appendChild(reviewItem);
+    }
+  }
+
+  if (productReviews.childElementCount === 0) {
+    productReviews.innerHTML = "<li>No reviews yet.</li>";
+  }
+
+  // Show the product detail section
+  document.getElementById("productDetail").style.display = "block";
+}
+
+
+
+// Function to open the modal for adding a new product
+function openAddProductModal() {
+  document.getElementById("addProductModal").style.display = "block";
+}
+
+// Function to close the modal
+function closeAddProductModal() {
+  document.getElementById("addProductModal").style.display = "none";
+}
+
+
+
+// Attach click event to rows for viewing details
+tableBody.addEventListener("click", event => {
+  const row = event.target.closest("tr");
+  if (!row) return;
+
+  const productId = row.children[0].textContent; // Assuming ID is in the first column
+  viewProductDetail(productId);
+});
+
+
+const reviews = []; // To store all reviews
+
+function addReview() {
+  const itemId = document.getElementById("reviewItemId").value;
+  const reviewText = document.getElementById("reviewText").value;
+  const rating = parseInt(document.getElementById("rating").value, 10);
+  if (!itemId || !reviewText || isNaN(rating) || rating < 1 || rating > 5) {
+    alert("Please provide valid item ID, review text, and rating (1-5).");
+    return;
+  }
+
+  // Check if the item exists in the product list
+  for (let i = 0; i < products.length; i++) {
+    if (products[i].id === itemId) {
+      product = products[i];
+      break;
+    }
+  }
+
+  if (!product) {
+    alert("Item not found.");
+    return;
+  }
+
+  // Add the review to the reviews array
+  reviews.push({
+    itemId,
+    reviewText,
+    rating,
+  });
+
+  alert(`Review added for item: ${product.name}`);
+
+}
+
 
 
 
@@ -198,13 +403,16 @@ function updateCart() {
       const category = document.getElementById('storeItems').value;
       const rows = document.querySelectorAll('#productTable tr');
       
-      rows.forEach(row => {
-        if (category === 'all' || row.getAttribute('data-category') === category) {
-          row.style.display = '';
-        } else {
-          row.style.display = 'none';
-        }
-      });
+      for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const rowCategory = row.getAttribute('data-category');
+
+    if (category === 'all' || rowCategory === category) {
+      row.style.display = ''; // Show the row
+    } else {
+      row.style.display = 'none'; // Hide the row
+    }
+  }
     }
 
     // Function to get the item name
@@ -218,26 +426,34 @@ document.getElementById("addButton").addEventListener("click", function() {
     addItem(itemName); // Assuming addItem is defined elsewhere
 });
 
-    function showItemDetails() {
-      const itemId = document.getElementById('itemId').value;
-      const quantity = document.getElementById('quantity').value;
-      const modal = document.getElementById('checkoutModal');
-      const item = cartItems.find(item => item.id === itemId);
-      
-      if (item && quantity <= item.quantityOnHand) {
-        modal.querySelector('h2').textContent = `Item Details: ${item.name}`;
-        modal.querySelector('form').querySelector('label').textContent = `Quantity Available: ${item.quantityOnHand}`;
-        modal.style.display = 'block';
-      } else {
-        alert('Item not found or insufficient quantity.');
-      }
+function showItemDetails() {
+  const itemId = document.getElementById('itemId').value;
+  const quantity = document.getElementById('quantity').value;
+  const modal = document.getElementById('checkoutModal');
+  
+  // Manually iterate over cartItems to find the item
+  let item = null;
+  for (let i = 0; i < cartItems.length; i++) {
+    if (cartItems[i].id === itemId) {
+      item = cartItems[i];
+      break;
     }
+  }
+  
+  if (item && quantity <= item.quantityOnHand) {
+    modal.querySelector('h2').textContent = `Item Details: ${item.name}`;
+    modal.querySelector('form').querySelector('label').textContent = `Quantity Available: ${item.quantityOnHand}`;
+    modal.style.display = 'block';
+  } else {
+    alert('Item not found or insufficient quantity.');
+  }
+}
+
 
 
     function addItem() {
-  const itemId = document.getElementById('itemId').value;
+  const itemId = document.getElementById('cart-itemId').value;
   const quantity = parseInt(document.getElementById('quantity').value, 10);
-
   if (!itemId || isNaN(quantity) || quantity <= 0) {
     alert('Please enter a valid item ID and quantity.');
     return;
@@ -252,7 +468,13 @@ document.getElementById("addButton").addEventListener("click", function() {
   }
 
   // Check if the item is already in the cart
-  let cartItem = cartItems.find(item => item.id === itemId);
+  let cartItem;
+  for (let i = 0; i < cartItems.length; i++) {
+    if (cartItems[i].id === itemId) {
+      cartItem = cartItems[i];
+      break;
+    }
+  }
 
   if (cartItem) {
     // Update the quantity in the cart if it doesn't exceed the available stock
@@ -282,6 +504,7 @@ document.getElementById("addButton").addEventListener("click", function() {
   updateCartTable();
   updateCartSummary();
 }
+
 
 function updateCartTable() {
   const tbody = document.getElementById('cartTable').getElementsByTagName('tbody')[0];
@@ -315,14 +538,24 @@ function updateCartSummary() {
 
 
 function removeItem() {
-  const itemId = document.getElementById('itemId').value;
+  const itemId = document.getElementById('cart-itemId').value;
   const quantity = parseInt(document.getElementById('quantity').value, 10);
-  const item = cartItems.find(item => item.id === itemId);
 
-  if (item && item.quantityInCart >= quantity) {
-    item.quantityInCart -= quantity;
-    if (item.quantityInCart <= 0) {
-      cartItems = cartItems.filter(cartItem => cartItem.id !== itemId);
+  let itemIndex = -1;
+
+  // Manually find the item index
+  for (let i = 0; i < cartItems.length; i++) {
+    if (cartItems[i].id === itemId) {
+      itemIndex = i;
+      break;
+    }
+  }
+
+  if (itemIndex !== -1 && cartItems[itemIndex].quantityInCart >= quantity) {
+    cartItems[itemIndex].quantityInCart -= quantity;
+    if (cartItems[itemIndex].quantityInCart <= 0) {
+      // Remove the item if the quantity in cart is zero or less
+      cartItems.splice(itemIndex, 1);
     }
 
     // Update the cart table and summary
@@ -333,6 +566,7 @@ function removeItem() {
     alert('Invalid item or quantity.');
   }
 }
+
 
 function updateCartTable() {
   const tbody = document.getElementById('cartTable').getElementsByTagName('tbody')[0];
