@@ -481,47 +481,65 @@ function showItemDetails() {
 
   // Debugging logs
   console.log("Entered Item ID:", itemId);
-  console.log("Cart Items:", cartItems);
 
   if (!itemId) {
     alert("Please enter a valid Item ID.");
     return;
   }
 
-  const item = products.find((cartItem) => cartItem.id.toLowerCase() === itemId.toLowerCase());
+  // Find the item based on the entered ID
+  const item = products.find((product) => product.id.toLowerCase() === itemId.toLowerCase());
 
   if (item) {
-    if (quantity ) {
+    // Check quantity availability (if applicable)
+    if (quantity && quantity <= item.quantity) {
       const itemDetailsDiv = document.getElementById("itemDetails");
-      itemDetailsDiv.innerHTML = `
-  <div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); background-color: #f9f9f9; max-width: 400px; margin: auto;">
-    <h3 style="color: #333; text-align: center; margin-bottom: 16px;">Item Details</h3>
-    <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
-      <strong style="color: #555;">Item ID:</strong> ${item.id}
-    </p>
-    <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
-      <strong style="color: #555;">Name:</strong> ${item.name}
-    </p>
-    <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
-      <strong style="color: #555;">Price:</strong> $${item.price}
-    </p>
-    <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
-      <strong style="color: #555;">Quantity Available:</strong> ${item.quantity}
-    </p>
-    <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
-      <strong style="color: #555;">Max Quantity Allowed:</strong> ${item.max}
-    </p>
-    <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
-      <strong style="color: #555;">Category:</strong> ${item.category}
-    </p>
-    <div style="text-align: center; margin-top: 16px;">
-      <img src="${item.image}" alt="${item.name}" style="border: 1px solid #ddd; border-radius: 4px; max-width: 100%; height: auto;" />
-    </div>
-  </div>
-`;
 
+      // Construct the review section
+      const reviewSection = item.reviewText && item.rating
+        ? `
+          <div style="margin-top: 16px; padding: 12px; border-top: 1px solid #ddd;">
+            <h4 style="color: #333; margin-bottom: 8px;">Review</h4>
+            <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
+              <strong style="color: #555;">Review Text:</strong> ${item.reviewText}
+            </p>
+            <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
+              <strong style="color: #555;">Rating:</strong> ${item.rating} / 5
+            </p>
+          </div>
+        `
+        : `<p style="color: #999; margin-top: 16px;">No reviews available for this item.</p>`;
+
+      // Render item details along with the review section
+      itemDetailsDiv.innerHTML = `
+        <div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); background-color: #f9f9f9; max-width: 400px; margin: auto;">
+          <h3 style="color: #333; text-align: center; margin-bottom: 16px;">Item Details</h3>
+          <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
+            <strong style="color: #555;">Item ID:</strong> ${item.id}
+          </p>
+          <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
+            <strong style="color: #555;">Name:</strong> ${item.name}
+          </p>
+          <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
+            <strong style="color: #555;">Price:</strong> $${item.price}
+          </p>
+          <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
+            <strong style="color: #555;">Quantity Available:</strong> ${item.quantity}
+          </p>
+          <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
+            <strong style="color: #555;">Max Quantity Allowed:</strong> ${item.max}
+          </p>
+          <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
+            <strong style="color: #555;">Category:</strong> ${item.category}
+          </p>
+          <div style="text-align: center; margin-top: 16px;">
+            <img src="${item.image}" alt="${item.name}" style="border: 1px solid #ddd; border-radius: 4px; max-width: 100%; height: auto;" />
+          </div>
+          ${reviewSection}
+        </div>
+      `;
     } else {
-      alert("Insufficient quantity available for the requested amount.");
+      alert("Insufficient quantity available.");
     }
   } else {
     alert("Item not found.");
