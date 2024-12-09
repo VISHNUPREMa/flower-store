@@ -51,7 +51,7 @@
       <tbody id="productTable"></tbody>
     </table>
     <button id="add-product" onclick="openAddProductModal()">Add Product</button>
-    
+  
     <!-- Modal for adding a new product -->
     <div id="addProductModal" class="modal" style="display:none;">
       <h2>Add New Product</h2>
@@ -140,8 +140,6 @@
   </div> 
 </body>
 
-
-
   <script>
 const products = [
   { id: "PID01", name: "Monstera", price: "CAD $29.99", quantity: 45, max: 3, category: "Tropical", image: "./images/istockphoto-1480093503-612x612.webp" },
@@ -190,13 +188,11 @@ function updateTime() {
     updateTime();
 
 const tableBody = document.getElementById("productTable");
-
 for (var i = 0; i < products.length; i++) {
   const product = products[i];
   const row = document.createElement("tr");
   row.setAttribute("data-category", product.category);
   row.setAttribute("data-price-cad", parseFloat(product.price.replace("CAD $", "")));
-
   row.innerHTML = `
     <td>${product.id}</td>
     <td>${product.name}</td>
@@ -524,9 +520,11 @@ function showItemDetails() {
 
 
 
-    function addItem() {
+function addItem() {
   const itemId = document.getElementById('cart-itemId').value;
   const quantity = parseInt(document.getElementById('quantity').value, 10);
+
+  // Input validation
   if (!itemId || isNaN(quantity) || quantity <= 0) {
     alert('Please enter a valid item ID and quantity.');
     return;
@@ -541,25 +539,22 @@ function showItemDetails() {
   }
 
   // Check if the item is already in the cart
-  var cartItem;
-  for (var i = 0; i < cartItems.length; i++) {
-    if (cartItems[i].id === itemId) {
-      cartItem = cartItems[i];
-      break;
-    }
-  }
+  let cartItem = cartItems.find(item => item.id === itemId);
 
   if (cartItem) {
-    // Update the quantity in the cart if it doesn't exceed the available stock
-    if (cartItem.quantityInCart + quantity <= product.quantity) {
-      cartItem.quantityInCart += quantity;
-    } else {
+    // Check if adding the quantity does not exceed the available stock and max stock
+    if (cartItem.quantityInCart + quantity > product.quantity) {
       alert(`Cannot add more than available stock (${product.quantity}).`);
       return;
+    } else if (cartItem.quantityInCart + quantity > product.max) {
+      alert(`Cannot add more than max stock (${product.max}).`);
+      return;
+    } else {
+      cartItem.quantityInCart += quantity;
     }
   } else {
-    // Add a new item to the cart
-    if (quantity <= product.quantity) {
+    // Add a new item to the cart if within stock and max limits
+    if (quantity <= product.quantity && quantity <= product.max) {
       cartItem = {
         id: product.id,
         name: product.name,
@@ -568,7 +563,7 @@ function showItemDetails() {
       };
       cartItems.push(cartItem);
     } else {
-      alert(`Cannot add more than available stock (${product.quantity}).`);
+      alert(`Cannot add more than available stock (${product.quantity}) or max stock (${product.max}).`);
       return;
     }
   }
@@ -577,6 +572,7 @@ function showItemDetails() {
   updateCartTable();
   updateCartSummary();
 }
+
 
 
 function updateCartTable() {
