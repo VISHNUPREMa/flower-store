@@ -73,18 +73,6 @@
       <button onclick="closeAddProductModal()">Cancel</button>
     </div>
     
-    
-    <div id="productDetail" class="modal" style="display:none;">
-      <h2>Product Details</h2>
-      <div id="productInfo"></div>
-      <h3>Reviews</h3>
-      <ul id="productReviews"></ul>
-      <button class="close" onclick="closeModal()">Close</button>
-    </div>
-    
-    
-
-
 
   <div class="cart-container">
     <h1>Cart</h1>
@@ -107,7 +95,6 @@
     </table>
   </div>
 
-  
   <div id="checkoutModal" class="modal1">
     <div class="modal-content">
       <span class="close" onclick="closeModal()">&times;</span>
@@ -121,6 +108,7 @@
         <button type="button" onclick="addItem()">Add Item</button>
         <button type="button" onclick="removeItem()">Remove Item</button>
       </form>
+      <div id="itemDetails"></div> <!-- For displaying item details -->
     </div>
   </div>
 
@@ -339,16 +327,7 @@ function viewProductDetail(productId) {
   }
 
   // Populate product details
-  const productInfo = document.getElementById("productInfo");
-  productInfo.innerHTML = `
-    <p><strong>ID:</strong> ${product.id}</p>
-    <p><strong>Name:</strong> ${product.name}</p>
-    <p><strong>Price:</strong> ${product.price}</p>
-    <p><strong>Quantity:</strong> ${product.quantity}</p>
-    <p><strong>Max Purchase:</strong> ${product.max}</p>
-    <p><strong>Category:</strong> ${product.category}</p>
-    <img src="${product.image}" alt="${product.name}" width="100">
-  `;
+
 
   // Display reviews for the product using a for loop
   const productReviews = document.getElementById("productReviews");
@@ -495,28 +474,60 @@ document.getElementById("addButton").addEventListener("click", function() {
     addItem(itemName); // Assuming addItem is defined elsewhere
 });
 
+
 function showItemDetails() {
-  const itemId = document.getElementById('itemId').value;
-  const quantity = document.getElementById('quantity').value;
-  const modal = document.getElementById('checkoutModal');
-  
-  // Manually iterate over cartItems to find the item
-  var item = null;
-  for (var i = 0; i < cartItems.length; i++) {
-    if (cartItems[i].id === itemId) {
-      item = cartItems[i];
-      break;
-    }
+  const itemId = document.getElementById("cart-itemId").value.trim();
+  const quantity = parseInt(document.getElementById("quantity").value, 10);
+
+  // Debugging logs
+  console.log("Entered Item ID:", itemId);
+  console.log("Cart Items:", cartItems);
+
+  if (!itemId) {
+    alert("Please enter a valid Item ID.");
+    return;
   }
-  
-  if (item && quantity <= item.quantityOnHand) {
-    modal.querySelector('h2').textContent = `Item Details: ${item.name}`;
-    modal.querySelector('form').querySelector('label').textContent = `Quantity Available: ${item.quantityOnHand}`;
-    modal.style.display = 'block';
+
+  const item = products.find((cartItem) => cartItem.id.toLowerCase() === itemId.toLowerCase());
+
+  if (item) {
+    if (quantity ) {
+      const itemDetailsDiv = document.getElementById("itemDetails");
+      itemDetailsDiv.innerHTML = `
+  <div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); background-color: #f9f9f9; max-width: 400px; margin: auto;">
+    <h3 style="color: #333; text-align: center; margin-bottom: 16px;">Item Details</h3>
+    <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
+      <strong style="color: #555;">Item ID:</strong> ${item.id}
+    </p>
+    <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
+      <strong style="color: #555;">Name:</strong> ${item.name}
+    </p>
+    <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
+      <strong style="color: #555;">Price:</strong> $${item.price}
+    </p>
+    <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
+      <strong style="color: #555;">Quantity Available:</strong> ${item.quantity}
+    </p>
+    <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
+      <strong style="color: #555;">Max Quantity Allowed:</strong> ${item.max}
+    </p>
+    <p style="margin: 8px 0; font-size: 14px; line-height: 1.6;">
+      <strong style="color: #555;">Category:</strong> ${item.category}
+    </p>
+    <div style="text-align: center; margin-top: 16px;">
+      <img src="${item.image}" alt="${item.name}" style="border: 1px solid #ddd; border-radius: 4px; max-width: 100%; height: auto;" />
+    </div>
+  </div>
+`;
+
+    } else {
+      alert("Insufficient quantity available for the requested amount.");
+    }
   } else {
-    alert('Item not found or insufficient quantity.');
+    alert("Item not found.");
   }
 }
+
 
 
 
