@@ -285,11 +285,11 @@ function updateCart() {
   // Clear existing content
   cartList.innerHTML = '';
   cartTableBody.innerHTML = '';
-  let totalItems = 0;
-  let totalPrice = 0;
+  var totalItems = 0;
+  var totalPrice = 0;
 
   // Using the old method (for loop) to iterate over cartItems
-  for (let i = 0; i < cartItems.length; i++) {
+  for (var i = 0; i < cartItems.length; i++) {
     const item = cartItems[i];
     totalItems += item.quantityInCart;
     totalPrice += item.price * item.quantityInCart;
@@ -317,8 +317,8 @@ function updateCart() {
 // Function to show product details and reviews
 function viewProductDetail(productId) {
   // Find the product by ID using a for loop
-  let product = null;
-  for (let i = 0; i < products.length; i++) {
+  var product = null;
+  for (var i = 0; i < products.length; i++) {
     if (products[i].id === productId) {
       product = products[i];
       break;
@@ -345,7 +345,7 @@ function viewProductDetail(productId) {
   // Display reviews for the product using a for loop
   const productReviews = document.getElementById("productReviews");
   productReviews.innerHTML = ""; // Clear previous reviews
-  for (let i = 0; i < reviews.length; i++) {
+  for (var i = 0; i < reviews.length; i++) {
     if (reviews[i].itemId === productId) {
       const reviewItem = document.createElement("li");
       reviewItem.innerHTML = `<strong>Rating:</strong> ${reviews[i].rating}/5 - ${reviews[i].reviewText}`;
@@ -397,7 +397,7 @@ function addReview() {
   }
 
   // Check if the item exists in the product list
-  for (let i = 0; i < products.length; i++) {
+  for (var i = 0; i < products.length; i++) {
     if (products[i].id === itemId) {
       product = products[i];
       break;
@@ -435,9 +435,9 @@ function addReview() {
       EUR: 'https://upload.wikimedia.org/wikipedia/commons/b/b7/Flag_of_Europe.svg'
     };
 
-    let cartItems = [];
-    let totalItems = 0;
-    let totalPrice = 0;
+    var cartItems = [];
+    var totalItems = 0;
+    var totalPrice = 0;
 
     function updatePrices() {
       const currency = document.getElementById('currencySelector').value;
@@ -464,7 +464,7 @@ function addReview() {
       const category = document.getElementById('storeItems').value;
       const rows = document.querySelectorAll('#productTable tr');
       
-      for (let i = 0; i < rows.length; i++) {
+      for (var i = 0; i < rows.length; i++) {
     const row = rows[i];
     const rowCategory = row.getAttribute('data-category');
 
@@ -493,8 +493,8 @@ function showItemDetails() {
   const modal = document.getElementById('checkoutModal');
   
   // Manually iterate over cartItems to find the item
-  let item = null;
-  for (let i = 0; i < cartItems.length; i++) {
+  var item = null;
+  for (var i = 0; i < cartItems.length; i++) {
     if (cartItems[i].id === itemId) {
       item = cartItems[i];
       break;
@@ -529,8 +529,8 @@ function showItemDetails() {
   }
 
   // Check if the item is already in the cart
-  let cartItem;
-  for (let i = 0; i < cartItems.length; i++) {
+  var cartItem;
+  for (var i = 0; i < cartItems.length; i++) {
     if (cartItems[i].id === itemId) {
       cartItem = cartItems[i];
       break;
@@ -602,10 +602,10 @@ function removeItem() {
   const itemId = document.getElementById('cart-itemId').value;
   const quantity = parseInt(document.getElementById('quantity').value, 10);
 
-  let itemIndex = -1;
+  var itemIndex = -1;
 
   // Manually find the item index
-  for (let i = 0; i < cartItems.length; i++) {
+  for (var i = 0; i < cartItems.length; i++) {
     if (cartItems[i].id === itemId) {
       itemIndex = i;
       break;
