@@ -12,7 +12,7 @@
   <div class="header-container">
     <h1>Online Store</h1>
     <div class="header-info">
-      <span>Wed Mar 16 2022 22:32:13 GMT-0400 (Eastern Daylight Time)</span>
+      <span id="currentTime"></span>
       <span>Currency: 
         <img id="flagImage" src="https://upload.wikimedia.org/wikipedia/en/c/cf/Flag_of_Canada.svg" alt="Canada Flag" class="flag" width="30">
         <select id="currencySelector" onchange="updatePricesAndFlag()">
@@ -79,7 +79,9 @@
       <div id="productInfo"></div>
       <h3>Reviews</h3>
       <ul id="productReviews"></ul>
+      <button class="close" onclick="closeModal()">Close</button>
     </div>
+    
     
 
 
@@ -148,13 +150,36 @@ const products = [
   { id: "PID04", name: "Bird of Paradise", price: "CAD $54.99", quantity: 50, max: 5, category: "Tropical", image: "./images/istockphoto-1268174122-612x612.jpg" },
   { id: "PID05", name: "Lily", price: "CAD $5.99", quantity: 200, max: 30, category: "Bulb", image: "./images/istockphoto-1372896722-612x612.jpg" },
   { id: "PID06", name: "Orchid", price: "CAD $19.99", quantity: 10, max: 10, category: "Indoor", image: "./images/istockphoto-1397385972-612x612.webp" },
-  { id: "PID07", name: "Philodendron", price: "CAD $9.99", quantity: 100, max: -50, category: "Indoor", image: "./images/istockphoto-1519664535-612x612.jpg" },
+  { id: "PID07", name: "Philodendron", price: "CAD $9.99", quantity: 100, max: 50, category: "Indoor", image: "./images/istockphoto-1519664535-612x612.jpg" },
   { id: "PID08", name: "Ghost Orchid", price: "CAD $129.99", quantity: 5, max: 1, category: "Rare", image: "./images/istockphoto-2179698519-612x612.jpg" },
+  { id: "PID09", name: "Jade Plant", price: "CAD $15.49", quantity: 80, max: 5, category: "Indoor", image: "./images/istockphoto-1481174550-612x612.webp" },
+  { id: "PID10", name: "Rose", price: "CAD $3.99", quantity: 150, max: 100, category: "Shrub", image: "./images/istockphoto-1480093503-612x612.webp" },
+  { id: "PID11", name: "Daffodil", price: "CAD $2.49", quantity: 300, max: 50, category: "Bulb", image: "./images/istockphoto-1156944070-612x612.jpg" },
+  { id: "PID12", name: "Cactus", price: "CAD $8.99", quantity: 60, max: 3, category: "Succulent", image: "./images/istockphoto-1268174122-612x612.jpg" },
+  { id: "PID13", name: "Succulent Mix", price: "CAD $12.99", quantity: 40, max: 6, category: "Succulent", image: "./images/istockphoto-1156944070-612x612.jpg" },
+  { id: "PID14", name: "Peony", price: "CAD $7.99", quantity: 120, max: 15, category: "Bulb", image: "./images/istockphoto-1481174550-612x612.webp" },
+  { id: "PID15", name: "Venus Flytrap", price: "CAD $24.99", quantity: 25, max: 2, category: "Carnivorous", image: "./images/istockphoto-1480093503-612x612.webp" },
 ];
+
+
+function showCurrentTime() {
+    const currentDate = new Date();
+    document.getElementById("currentTime").textContent = currentDate.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true // Ensure 12-hour format with AM/PM
+    });
+  }
+
+  // Call the function on page load
+  showCurrentTime();
+
+  // Update the time every minute (optional)
+  setInterval(showCurrentTime, 60000);
 
 const tableBody = document.getElementById("productTable");
 
-for (let i = 0; i < products.length; i++) {
+for (var i = 0; i < products.length; i++) {
   const product = products[i];
   const row = document.createElement("tr");
   row.setAttribute("data-category", product.category);
@@ -173,40 +198,76 @@ for (let i = 0; i < products.length; i++) {
   tableBody.appendChild(row);
 }
 
-function addNewProduct() {
-  const newProduct = {
-    id: document.getElementById("productId").value,
-    name: document.getElementById("productName").value,
-    price: document.getElementById("productPrice").value,
-    quantity: parseInt(document.getElementById("productQuantity").value, 10),
-    max: parseInt(document.getElementById("productMax").value, 10),
-    category: document.getElementById("productCategory").value,
-    image: document.getElementById("productImage").value
-  };
+function StoreItem(
+  id,
+  name,
+  price,
+  quantityOnHand,
+  maxPerCustomer,
+  category,
+  costOfShipping,
+  reviews = [],
+  description,
+  image
+) {
+  this.id = id;
+  this.name = name;
+  this.price = price;
+  this.quantityOnHand = quantityOnHand;
+  this.maxPerCustomer = maxPerCustomer;
+  this.category = category;
+  this.costOfShipping = costOfShipping;
+  this.reviews = reviews;
+  this.description = description;
+  this.image = image;
+}
 
-  // Add new product to the products array using unshift
+
+function addNewProduct() {
+  // Create a new product instance using the StoreItem constructor
+  const newProduct = new StoreItem(
+    document.getElementById("productId").value,
+    document.getElementById("productName").value,
+    parseFloat(document.getElementById("productPrice").value), // Parse price as a number
+    parseInt(document.getElementById("productQuantity").value, 10),
+    parseInt(document.getElementById("productMax").value, 10),
+    document.getElementById("productCategory").value, // Shipping cost
+    [], // Empty reviews array for now
+    document.getElementById("productImage").value
+  );
+
+  // Add the new product to the products array using unshift
   products.unshift(newProduct);
 
   // Create a new row for the new product
   const row = document.createElement("tr");
   row.setAttribute("data-category", newProduct.category);
-  row.setAttribute("data-price-cad", parseFloat(newProduct.price.replace("CAD $", "")));
+  row.setAttribute("data-price-cad", newProduct.price);
 
   row.innerHTML = `
     <td>${newProduct.id}</td>
     <td>${newProduct.name}</td>
-    <td class="price">${newProduct.price}</td>
-    <td>${newProduct.quantity}</td>
-    <td>${newProduct.max}</td>
+    <td class="price">CAD $${newProduct.price.toFixed(2)}</td>
+    <td>${newProduct.quantityOnHand}</td>
+    <td>${newProduct.maxPerCustomer}</td>
     <td>${newProduct.category}</td>
     <td><img src="${newProduct.image}" alt="${newProduct.name}" width="50"></td>
   `;
 
   // Append the new row to the table body
-  tableBody.prepend(row); // Using prepend to add the row at the beginning of the table
+  tableBody.prepend(row);
 
   closeAddProductModal();
 }
+
+
+function closeModal() {
+  document.getElementById('productDetail').style.display = 'none';
+}
+function closeModal() {
+  document.getElementById('productDetail').style.display = 'none';
+}
+
 
 
 function closeAddProductModal() {
